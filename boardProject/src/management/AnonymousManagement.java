@@ -1,5 +1,5 @@
 package management;
 
-public class AnonymousManagement {
+public class AnonymousManagement extends Management {
 
 }

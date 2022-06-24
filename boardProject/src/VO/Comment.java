@@ -5,15 +5,8 @@ public class Comment {
 	private int commentNum;
 	private String memberId;
 	private String comment;
-	private String tableName;
+
 	
-	
-	public String getTableName() {
-		return tableName;
-	}
-	public void setTableName(String tableName) {
-		this.tableName = tableName;
-	}
 	public int getTextNum() {
 		return textNum;
 	}

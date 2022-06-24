@@ -1,6 +1,18 @@
 package VO;
 
 public class LoginMember {
+	// 싱글톤(단하나의 객체 보장)
+	private static LoginMember loginMember = null;
+	private LoginMember() {
+		
+	}
+	
+	public static LoginMember getInstance() {
+		if (loginMember == null) {
+			loginMember = new LoginMember();
+		}
+		return loginMember;
+	}
 	String memberId;
 	String memberPwd;
 	int role;
