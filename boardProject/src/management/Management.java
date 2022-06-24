@@ -48,9 +48,40 @@ public class Management {
 	// sequence 만들기
 	protected String createContentSeqName() {
 		String sequence = "";
-		
+		// sequence를 만들려고하는ㄷ
 		return sequence;
 	}
+	// sequence를 만들려고하는데
+	// 테이블 이름 명 생성한 거랑 똑같이, 시퀀스를 가지고 오고 싶다.
+	// 그런데 시퀀스 이름을 테이블에 저정해 놓은 것이 아니라서
+	// selectBoard메소드는 사용할 수 없다
+	// 그럼 어떻게 해결할 것인가
+	// 테이블 이름이 뭐 일때 시퀀스는 뭐
+	// 테이블 이름이 뭐 일때 시퀀스는 뭐 이런식으로 가지고 올 수 밖에 없나
+	
+	
+	// 나중에 create문을 돌릴 때 특정이름을 받아서 시퀀스도 알아서 생성되도록 처리하자
+	// 그러는 경우 create로 새 게시판을 만들때 번호를 자동적으로 부여받을 수 있을테니까
+	// 그러면 지금 가지고 있는 시퀀스는 어떤 방식으로 가지고 오는가
+	// 시퀀스를 조회하는 메소드를 사용해서 sql문에 셋팅하고 selectSequence를 하는 
+	// 메소드를 boardDAO에 만들고 그거를 가져와서 이 메소드에 셋팅하자
+	
+	// 시퀀스 생성 문제점
+	// 1. 테이블별로 시퀀스가 다르게 생성되는데 그걸 어떻게 처리할 것인가
+	// 2. 
+	
+	// 해결방법
+	// 1. 일단 먼저 관리자가 게시판을 생성할 때 무조건 content테이블과 comment테이블이 생성될 수 있도록
+	// 메소드를 작성한다
+	// 2. 생성된 content테이블과 comment테이블에 맞는 시퀀스를 만드는 함수를 따로 만든다
+	// 3. 그 시퀀스명을 가지고와서 createContent에서 시퀀스.nextval이런 식으로 돌리면 된다.
+	
+	// 이를 위해 관리자가 게시판을 생성할 때 사용할 createBoard메소드를 dao에 만든다, 그리고 그 메소드를
+	// management에서 돌린다.
+	
+	// 그런데 이미 생성된 시퀀스들은 어떤 방식으로 들고와야하는거지?
+	// 하드코딩하자
+	// 유저게시판 관리자게시판, 익명 게시판은 이미 있는 게시판들인데?
 	
 	protected String createCommentSeqName() {
 		String sequence = "";
