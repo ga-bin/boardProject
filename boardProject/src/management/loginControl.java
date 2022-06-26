@@ -12,8 +12,8 @@ public class loginControl {
 	MemberDAO mDAO = MemberDAO.getInstance();
 
 	public loginControl() {
+		menuPrint();
 		while (true) {
-			menuPrint();
 			int selectNum = menuSelect();
 			if (selectNum == 1) {
 				memberShip();
@@ -21,7 +21,10 @@ public class loginControl {
 				login();
 			} else if (selectNum == 3) {
 				new AnonymousManagement();
-			} else if (selectNum == 9) {
+			} else if (selectNum == 4) {
+				logOut();
+			}
+			else if (selectNum == 9) {
 				exit();
 				break;
 			} else {
@@ -31,9 +34,9 @@ public class loginControl {
 	}
 
 	public void menuPrint() {
-		System.out.println("===============================================");
-		System.out.println("1.회원가입     2. 로그인    3. 익명게시판   9. 프로그램종료");
-		System.out.println("===============================================");
+		System.out.println("=============================================================");
+		System.out.println("1.회원가입     2. 로그인    3. 익명게시판   4. 로그 아웃     9. 프로그램종료");
+		System.out.println("==============================================================");
 	}
 
 	public int menuSelect() {
@@ -43,7 +46,6 @@ public class loginControl {
 			selectNum = Integer.parseInt(sc.nextLine());
 		} catch (NumberFormatException e) {
 			System.out.println("숫자 형식으로 입력하세요");
-			return menuSelect();
 		}
 		return selectNum;
 	}
@@ -94,7 +96,8 @@ public class loginControl {
 			loginMember.setExit(0);
 			if (member.getMemberId().equals("admin")) {
 				loginMember.setRole(0);
-				new AdminManagement();
+				AdminManagement adminManagement = new AdminManagement();
+				adminManagement.run();
 			} else {
 				loginMember.setRole(1);
 				new UserManagement();
@@ -105,5 +108,13 @@ public class loginControl {
 		}
 
 		return loginMember;
+	}
+	
+	public void logOut() {
+		System.out.println("로그아웃합니다.");
+		LoginMember loginMember = LoginMember.getInstance();
+		// loginMember의 객체를 가지고 와서 초기화시켜야 한다.
+		loginMember.setMemberId(null);
+		loginMember.setMemberPwd(null);
 	}
 }

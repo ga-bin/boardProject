@@ -31,6 +31,11 @@ public class Comment {
 	public void setComment(String comment) {
 		this.comment = comment;
 	}
+	@Override
+	public String toString() {
+		return "게시글번호 : " + textNum + ", 댓글 번호 : " + commentNum + ", id : " + memberId + ", 내용 : "
+				+ comment;
+	}
 	
 	
 }
