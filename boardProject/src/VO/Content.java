@@ -34,7 +34,7 @@ public class Content {
 	
 	@Override
 	public String toString() {
-		return "게시글 번호 : " + textNum + "작성자 : " + memberId +  "제목 : " + title + "내용 : " + content;
+		return "게시글 번호 : " + textNum + " , 작성자 : " + memberId +  " , 제목 : " + title + " , 내용 : " + content;
 		
 	}
 }

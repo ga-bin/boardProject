@@ -44,10 +44,6 @@ public class AdminManagement extends Management {
 	}
 
 	private void contentMenuPrint() {
-		selectBoard();
-		if (boardName.equals("")) {
-			System.out.println("등록된 게시판이 아닙니다.");
-		}
 		System.out.println("=================================================================");
 		System.out.println("1. 게시글 작성    2. 게시글 삭제   3. 글 번호로 게시글 조회  4. 제목으로 게시글 조회");
 		System.out.println("5. 내용으로 게시글 조회    6. 게시글 수정     9. 뒤로가기");
@@ -56,10 +52,9 @@ public class AdminManagement extends Management {
 	}
 
 	private void commentMenuPrint() {
+		showAllBoard();
 		selectBoard();
-		if (boardName.equals("")) {
-			System.out.println("등록된 게시판이 아닙니다.");
-		}
+		
 		System.out.println("=============================================================");
 		System.out.println("1. 댓글 생성   2. 댓글 수정    3. 댓글 삭제   4. 댓글 조회    9. 뒤로가기");
 		System.out.println("=============================================================");
@@ -92,7 +87,6 @@ public class AdminManagement extends Management {
 
 	private void contentMenuRun() {
 		while (true) {
-			System.out.println("메뉴를 입력하세요");
 			int selectNum = selectMenu();
 			if (selectNum == 1) {
 				createContent();
@@ -108,7 +102,7 @@ public class AdminManagement extends Management {
 				updateTitleOrContent();
 			} else if (selectNum == 9) {
 				back();
-				return;
+				run();
 			} else {
 				showInputError();
 				return;
@@ -118,7 +112,6 @@ public class AdminManagement extends Management {
 
 	private void commentMenuRun() {
 		while (true) {
-			System.out.println("메뉴를 입력하세요");
 			int selectNum = selectMenu();
 			if (selectNum == 1) {
 				createComment();
@@ -161,7 +154,6 @@ public class AdminManagement extends Management {
 		} else if (selectNum == 2) {
 			boardName = boardName += "_anonymous";
 		}
-		System.out.println(boardName);
 		bDAO.createContentTable(boardName);
 		bDAO.createCommentTable(boardName);
 		bDAO.insertTableToBoardInfo(boardName);

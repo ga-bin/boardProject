@@ -2,7 +2,6 @@ package VO;
 
 public class BoardInfo {
 	String boardName;
-	int boardNum;
 	int usAble;
 	
 	
@@ -18,17 +17,12 @@ public class BoardInfo {
 	public void setBoardName(String boardName) {
 		this.boardName = boardName;
 	}
-	public int getBoardNum() {
-		return boardNum;
-	}
-	public void setBoardNum(int boardNum) {
-		this.boardNum = boardNum;
-	}
+	
 	
 	@Override
 	public String toString() {
 		String str = "";
-		str += "게시판 번호 : " + boardNum + "게시판 이름 : " + boardName;
+		str += "게시판 이름 : " + boardName;
 		if (usAble == 0) {
 			str += " 사용가능";
 		} else {
