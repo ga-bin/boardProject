@@ -19,8 +19,8 @@ public class AdminManagement extends Management {
 			} else if (selectNum == 9) {
 				back();
 				// 뒤로가기 메소드는 다시 loginControl을 호출하는 것으로 가자
-				new loginControl();
-				return;
+				LoginControl loginControl = new LoginControl();
+				loginControl.run();
 			} else {
 				showInputError();
 				return;
@@ -54,6 +54,12 @@ public class AdminManagement extends Management {
 	private void commentMenuPrint() {
 		showAllBoard();
 		selectBoard();
+		
+		BoardInfo boardInfo = bDAO.showOneBoard(boardName);
+		boolean usedBoard = blockUnusedBoard();
+		if (usedBoard == false) {
+			return;
+		}
 		
 		System.out.println("=============================================================");
 		System.out.println("1. 댓글 생성   2. 댓글 수정    3. 댓글 삭제   4. 댓글 조회    9. 뒤로가기");
@@ -118,12 +124,12 @@ public class AdminManagement extends Management {
 			} else if (selectNum == 2) {
 				updateComment();
 			} else if (selectNum == 3) {
-				deleteComment();
+				deleteComment(); 
 			} else if (selectNum == 4) {
 				showComment();
 			} else if (selectNum == 9) {
 				back();
-				return;
+				run();
 			} else {
 				showInputError();
 				return;
@@ -150,15 +156,15 @@ public class AdminManagement extends Management {
 		System.out.println("=======================");
 		int selectNum = inputNum();
 		if (selectNum == 1) {
-			boardName = boardName += "_user";
+			boardName = boardName += "_USER";
 		} else if (selectNum == 2) {
-			boardName = boardName += "_anonymous";
+			boardName = boardName += "_ANONYMOUS";
 		}
 		bDAO.createContentTable(boardName);
 		bDAO.createCommentTable(boardName);
+		bDAO.createSeq(boardName, "CONTENT");
+		bDAO.createSeq(boardName, "COMMENT");
 		bDAO.insertTableToBoardInfo(boardName);
-		bDAO.createSeq(boardName, "content");
-		bDAO.createSeq(boardName, "comment");
 		
 	}
 

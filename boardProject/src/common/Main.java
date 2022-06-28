@@ -1,12 +1,12 @@
 package common;
 
-import management.loginControl;
+import management.LoginControl;
 
 public class Main {
 
 	public static void main(String[] args) {
-		new loginControl();
-
+		LoginControl loginControl = new LoginControl();
+		loginControl.run();
 	}
 
 }

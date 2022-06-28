@@ -3,8 +3,15 @@ package VO;
 public class BoardInfo {
 	String boardName;
 	int usAble;
+	int boardNumer;
 	
 	
+	public int getBoardNumer() {
+		return boardNumer;
+	}
+	public void setBoardNumer(int boardNumer) {
+		this.boardNumer = boardNumer;
+	}
 	public int getUsAble() {
 		return usAble;
 	}

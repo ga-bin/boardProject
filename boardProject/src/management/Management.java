@@ -18,17 +18,20 @@ public class Management {
 	Scanner sc = new Scanner(System.in);
 	String boardName;
 	LoginMember loginMember = LoginMember.getInstance();
-
+	
 	protected String selectBoard() {
 		boardName = "";
 		System.out.println("게시판 선택>");
-		System.out.println("========================================");
-		System.out.println("1. 공지사항 게시판    2. 자유게시판(유저)   3. 자유게시판(익명)");
-		System.out.println("========================================");
+		System.out.println("====================================================================");
+		System.out.println("1. 공지사항 게시판    2. 자유게시판(유저)   3. 자유게시판(익명)   7. 코딩게시판(유저) ");
+		System.out.println("====================================================================");
 		int selectNum = Integer.parseInt(sc.nextLine());
 		try {
 			BoardInfo board = bDAO.selectBoard(selectNum);
 			boardName += board.getBoardName();
+			bDAO.showAllContent(boardName);
+			
+			// 있는 글 전체 조회
 		} catch (NumberFormatException e) {
 			System.out.println("숫자 형식으로 입력해 주세요");
 			return selectBoard();
@@ -37,7 +40,17 @@ public class Management {
 	}
 
 	protected void createContent() {
+		if (!loginMember.getMemberId().equals("admin") && boardName.contains("NOTICE")) {
+			System.out.println("권한이 없습니다.");
+			return;
+		}
+			
 		selectBoard();
+		boolean usedBoard = blockUnusedBoard();
+		if (usedBoard == false) {
+			return;
+		}
+		
 
 		Content content = new Content();
 		content.setMemberId(loginMember.getMemberId());
@@ -47,12 +60,15 @@ public class Management {
 		content.setContent(sc.nextLine());
 
 		// 시퀀스 이름 어떤 식으로 가져오지
-		String sequence = createSequenceName();
-		bDAO.createContent(boardName, content, sequence);
+		bDAO.createContent(boardName, content);
 	}
 
 	protected void showContentByNum() {
-		selectBoard();
+		BoardInfo boardInfo = bDAO.showOneBoard(boardName);
+		boolean usedBoard = blockUnusedBoard();
+		if (usedBoard == false) {
+			return;
+		}
 
 		System.out.println("번호를 입력하세요");
 		int contentNum = inputNum();
@@ -67,6 +83,12 @@ public class Management {
 
 	protected void showContentByCon() {
 		selectBoard();
+		BoardInfo boardInfo = bDAO.showOneBoard(boardName);
+		boolean usedBoard = blockUnusedBoard();
+		if (usedBoard == false) {
+			return;
+		}
+		
 		System.out.println("내용의 일부를 입력하세요");
 		String contentText = sc.nextLine();
 		if (bDAO.showContentByCon(boardName, contentText) == null) {
@@ -82,6 +104,12 @@ public class Management {
 
 	protected void showContentByTitle() {
 		selectBoard();
+		BoardInfo boardInfo = bDAO.showOneBoard(boardName);
+		if (boardInfo.getUsAble() == 1) {
+			System.out.println("사용불가능한 게시판입니다.");
+			return;
+		}
+		
 		System.out.println("제목의 일부를 입력하세요");
 		String titleText = sc.nextLine();
 		if (bDAO.showContentByTitle(boardName, titleText) == null) {
@@ -95,7 +123,17 @@ public class Management {
 	}
 
 	protected void updateTitleOrContent() {
+		if (!loginMember.getMemberId().equals("admin") && boardName.contains("NOTICE")) {
+			System.out.println("권한이 없습니다.");
+			return;
+		}
+		
 		selectBoard();
+		BoardInfo boardInfo = bDAO.showOneBoard(boardName);
+		if (boardInfo.getUsAble() == 1) {
+			System.out.println("사용불가능한 게시판입니다.");
+			return;
+		}
 
 		System.out.println("수정할 글의 번호를 입력하세요");
 		int contentNum = Integer.parseInt(sc.nextLine());
@@ -114,7 +152,6 @@ public class Management {
 		System.out.println("수정할 제목을 입력하세요(수정하지 않을 경우 0)");
 		String contentText = sc.nextLine();
 		if (!contentText.equals("0")) {
-			bDAO.updateTitle(boardName, contentText, contentNum);
 		}
 
 		System.out.println("수정할 게시글 내용을 입력하세요(수정하지 않을 경우 0)");
@@ -125,7 +162,17 @@ public class Management {
 	}
 
 	protected void deleteContent() {
+		if (!loginMember.getMemberId().equals("admin") && boardName.contains("NOTICE") || loginMember.getMemberId().equals("")) {
+			System.out.println("권한이 없습니다.");
+			return;
+		}
+		
 		selectBoard();
+		boolean usedBoard = blockUnusedBoard();
+		if (usedBoard == false) {
+			return;
+		}
+		
 
 		System.out.println("삭제할 글의 번호를 입력하세요");
 		int contenNum = Integer.parseInt(sc.nextLine());
@@ -160,7 +207,7 @@ public class Management {
 
 		// comment안에 내용 입력받아서 넣기
 
-		bDAO.createComment(createCommentBoardName(), comment, createSequenceName());
+		bDAO.createComment(bDAO.createCommentBoardName(boardName), comment, bDAO.createSequenceName(boardName));
 		// 게시글 테이블은 boardinfo안에 들어있어서 select문을 통해 가지고 온 selectboard메소드로 가져올 수 있다
 		// 그러면 boardinfo 테이블에 없는 댓글 테이블은 어떤 방식으로 가져와야 하는거지?
 
@@ -180,8 +227,10 @@ public class Management {
 			System.out.println("작성된 게시글이 아닙니다.");
 			return showComment();
 		}
-
 		List<Comment> list = bDAO.showAllComment(boardName, contentNum);
+		if (list.size() == 0) {
+			System.out.println("작성된 댓글이 없습니다.");
+		}
 		for (Comment comment : list) {
 			System.out.println(comment);
 		}
@@ -197,31 +246,33 @@ public class Management {
 
 		// 만약 그 번호에 해당하는 댓글이 없으면
 		// 해당하는 댓글이 없습니다 하고 다시 메소드 호출
-		if (bDAO.showAllComment(createCommentBoardName(), contentNum).size() == 0) {
+		if (bDAO.showAllComment(boardName, contentNum).size() == 0) {
 			System.out.println("해당하는 댓글이 없습니다.");
 			updateComment();
 		}
 
 		Comment comment = inputComment();
 		comment.setTextNum(contentNum);
+		comment.setCommentNum(commentNum);
 
+		
 		// 만약 그 번호에 해당하는 댓글이 있으면
 		// 댓글의 작성자가 loginId 와 같은지 확인하기
-		if (loginMember.getMemberId() == bDAO.showOneComment(createCommentBoardName(), commentNum).getMemberId()) {
-			System.out.println("수정할 댓글 내용을 입력하세요");
-			bDAO.updateComment(createCommentBoardName(), comment, sc.nextLine());
+		if (loginMember.getMemberId().equals(bDAO.showOneComment(boardName, commentNum).getMemberId())) {
+			bDAO.updateComment(boardName, comment);
 		} else {
 			System.out.println("수정권한이 없습니다.");
 		}
 
 	}
-
+	
+	// inputComment전체 수정하기
 	protected void deleteComment() {
 		selectBoard();
 		// 해당 게시글에 대한 전체 댓글을 출력해야한다.
 		// 그 출력한 댓글을 바탕으로 유저가 번호를 선택하게 하기
 		int contentNum = showComment();
-		System.out.println("수정할 댓글 번호를 입력하세요");
+		System.out.println("삭제할 댓글 번호를 입력하세요");
 		int commentNum = Integer.parseInt(sc.nextLine());
 
 		// 만약 그 번호에 해당하는 댓글이 있으면
@@ -233,10 +284,8 @@ public class Management {
 			deleteComment();
 		}
 
-		if (loginMember.getMemberId() == bDAO.showOneComment(boardName, commentNum).getMemberId()) {
-			Comment comment = inputComment();
-			comment.setTextNum(contentNum);
-			bDAO.deleteComment(boardName, comment);
+		if (loginMember.getMemberId().equals(bDAO.showOneComment(boardName, commentNum).getMemberId())) {
+			bDAO.deleteComment(boardName, commentNum);
 		} else {
 			System.out.println("삭제 권한이 없습니다.");
 		}
@@ -281,26 +330,23 @@ public class Management {
 
 	protected Comment inputComment() {
 		Comment comment = new Comment();
-		System.out.println("게시글 내용을 입력하세요");
-		comment.setComment(sc.nextLine());
+		System.out.println("댓글 내용을 입력하세요");
+		String commentText = sc.nextLine();
+		comment.setComment(commentText);
 		comment.setMemberId(loginMember.getMemberId());
 
 		return comment;
 	}
-
-	protected String createCommentBoardName() {
-		String[] list = boardName.split(" ");
-		String commentBoardName = list[0] + "_" + list[1] + "_COMMENT_BOARD";
-		return commentBoardName;
-	}
-
-	protected String createSequenceName() {
-		String[] list = boardName.split(" ");
-
-		String sequenceName = "";
-		for (int i = 0; i < 3; i++) {
-			sequenceName += list[i] + "_";
+	
+	protected boolean blockUnusedBoard() {
+		boolean usedBoard;
+		BoardInfo boardInfo = bDAO.showOneBoard(boardName);
+		if (boardInfo.getUsAble() == 1) {
+			System.out.println("사용불가능한 게시판입니다.");
+			usedBoard = false;
+			return usedBoard;
 		}
-		return sequenceName + "BOARD_SEQ";
+		usedBoard = true;
+		return usedBoard;
 	}
 }

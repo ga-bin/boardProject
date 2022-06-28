@@ -45,7 +45,8 @@ public class BoardDAO extends DAO {
 		return board;
 	}
 	
-	public String createBoardName(String names) {
+	// 
+	public String createBoardNameUnderbar(String names) {
 		String[] list = names.split(" ");
 		String name = list[0];
 		for (int i = 1 ; i < list.length; i++) {
@@ -53,9 +54,26 @@ public class BoardDAO extends DAO {
 		}
 		return name;
 	}
+	
+	public String createCommentBoardName(String tableName) {
+		String[] list = tableName.split(" ");
+		String commentBoardName = list[0] + "_" + list[1] + "_COMMENT_BOARD";
+		return commentBoardName;
+	}
+	
+	public String createSequenceName(String tableName) {
+		String[] list = tableName.split(" ");
+
+		String sequenceName = "";
+		for (int i = 0; i < 3; i++) {
+			sequenceName += list[i] + "_";
+		}
+		return sequenceName + "_SEQ";
+	}
+	
 	public BoardInfo selectBoard(String tableName) {
 		BoardInfo board = null;
-		String boardName = createBoardName(tableName);
+		String boardName = createBoardNameUnderbar(tableName);
 		try {
 			connect();
 			String sql = "SELECT * FROM boardInfo WHERE board_name = '" + boardName + "'";
@@ -65,7 +83,7 @@ public class BoardDAO extends DAO {
 				board = new BoardInfo();
 				board.setUsAble(rs.getInt("usable"));
 				String names = rs.getString("board_name");	
-				String name = createBoardName(names);
+				String name = createBoardNameUnderbar(names);
 				board.setBoardName(name);
 				System.out.println(name);
 			}
@@ -116,9 +134,16 @@ public class BoardDAO extends DAO {
 	// 나눌지는 생각해 보자
 
 	public void insertTableToBoardInfo(String tableName) {
+		String[] names = tableName.split(" ");
+		String boardName = names[0];
+		for (int i = 1; i < names.length; i++) {
+			boardName += " " + names[i];
+		}
+		boardName = boardName.toUpperCase();
+		
 		try {
 			connect();
-			String sql = "INSERT into boardinfo (board_name, board_number) VALUES ('" + tableName + "_content_board" + "', boardinfo_seq.nextval())";
+			String sql = "INSERT into boardinfo (board_name, board_number) VALUES ('" + boardName + " CONTENT BOARD" + "', boardinfo_seq.nextval)";
 			stmt = conn.createStatement();
 			int result = stmt.executeUpdate(sql);
 			if (result > 0) {
@@ -137,7 +162,7 @@ public class BoardDAO extends DAO {
 		try {
 			connect();
 			String sql = "CREATE SEQUENCE " + tableName + "_" + boardType
-					+ "_seq INCREMENT BY 1 START WITH 1 MINVALUE 1 MAXVALUE 9999 NOCYCLE NOCACHE NOORDER";
+					+ "_SEQ INCREMENT BY 1 START WITH 1 MINVALUE 1 MAXVALUE 9999 NOCYCLE NOCACHE NOORDER";
 			stmt = conn.createStatement();
 			Boolean result = stmt.execute(sql);
 
@@ -172,6 +197,26 @@ public class BoardDAO extends DAO {
 		return list;
 	}
 
+	public BoardInfo showOneBoard(String tableName) {
+		BoardInfo boardInfo = null;
+		try {
+			connect();
+			String sql = "SELECT * FROM boardinfo WHERE board_name = ?";
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setString(1, tableName);
+			rs = pstmt.executeQuery();
+			if (rs.next()) {
+				boardInfo = new BoardInfo();
+				boardInfo.setBoardName(rs.getString("board_name"));
+				boardInfo.setUsAble(rs.getInt("usable"));
+			}
+		} catch(SQLException e) {
+			e.printStackTrace();
+		} finally {
+			disconnect();
+		}
+		return boardInfo;
+	}
 	public List<BoardInfo> showUsedBoard() {
 		List<BoardInfo> list = new ArrayList<>();
 		try {
@@ -215,12 +260,18 @@ public class BoardDAO extends DAO {
 		}
 	}
 
-	public void createContent(String tableName, Content content, String sequence) {
+	public void createContent(String tableName, Content content) {
 		// 나중에 managemenct에서 createcontent를 돌릴때 시퀀스명.nextval이런식으로 구성하면 될 것 같다.
 		try {
+		String[] names = tableName.split(" ");
+		String sequence = names[0];
+		for (int i = 1; i < names.length-1; i++) {
+			sequence += "_" + names[i];
+		}
+		sequence += "_SEQ";
 			connect();
 			
-			String boardName = createBoardName(tableName);
+			String boardName = createBoardNameUnderbar(tableName);
 			
 			String sql = "INSERT INTO " + boardName + " VALUES (" + sequence + ".nextval, ?, ?, ?)";
 			pstmt = conn.prepareStatement(sql);
@@ -236,17 +287,43 @@ public class BoardDAO extends DAO {
 			} else {
 				System.out.println("게시글이 등록되지 않았습니다.");
 			}
-			;
-		} catch (SQLException e) {
+		}
+		 catch(SQLException e) {
 			e.printStackTrace();
 		} finally {
 			disconnect();
 		}
 	}
+		
 
+
+	public List<Content> showAllContent(String tableName) {
+		String boardName = createBoardNameUnderbar(tableName);
+		List<Content> list = new ArrayList<>();
+		try {
+			connect();
+			String sql = "SELECT * FROM " + boardName + " ORDER BY text_num"; 
+			stmt = conn.createStatement();
+			rs = stmt.executeQuery(sql);
+			while (rs.next()) {
+				Content content = new Content();
+				content.setContent(rs.getString("content"));
+				content.setMemberId(rs.getString("member_id"));
+				content.setTextNum(rs.getInt("text_num"));
+				content.setTitle(rs.getString("title"));
+				
+				list.add(content);
+			}
+		} catch(SQLException e) {
+			e.printStackTrace();
+		} finally {
+			disconnect();
+		}
+		return list;
+	}
 	public Content showContentByNum(String tableName, int textNum) {
 		Content content = null;
-		String boardName = createBoardName(tableName);
+		String boardName = createBoardNameUnderbar(tableName);
 		try {
 			connect();
 			String sql = "SELECT * FROM " + boardName + " WHERE text_num = " + textNum;
@@ -271,7 +348,7 @@ public class BoardDAO extends DAO {
 	}
 
 	public List<Content> showContentByCon(String tableName, String textContent) {
-		String boardName = createBoardName(tableName);
+		String boardName = createBoardNameUnderbar(tableName);
 		List<Content> list = new ArrayList<>();
 		try {
 			connect();
@@ -297,7 +374,7 @@ public class BoardDAO extends DAO {
 	}
 
 	public List<Content> showContentByTitle(String tableName, String title) {
-		String boardName = createBoardName(tableName);
+		String boardName = createBoardNameUnderbar(tableName);
 		List<Content> list = new ArrayList<>();
 		try {
 			connect();
@@ -324,7 +401,7 @@ public class BoardDAO extends DAO {
 	}
 
 	public void updateTitle(String tableName, String newTitle, int textNum) {
-		String boardName = createBoardName(tableName);
+		String boardName = createBoardNameUnderbar(tableName);
 		try {
 			connect();
 			String sql = "UPDATE " + boardName + " SET (title) = ? WHERE text_num = ?";
@@ -347,7 +424,7 @@ public class BoardDAO extends DAO {
 	}
 
 	public void updateContent(String tableName, String newContent, int textNum) {
-		String boardName = createBoardName(tableName);
+		String boardName = createBoardNameUnderbar(tableName);
 		try {
 			connect();
 			String sql = "UPDATE " + boardName + " SET (content) = ? WHERE text_num = ?";
@@ -373,7 +450,7 @@ public class BoardDAO extends DAO {
 	// 제목을 수정안하려면 0을 클릭해라 이런식으로 해서
 
 	public void deleteContent(String tableName, int textNum) {
-		String boardName = createBoardName(tableName);
+		String boardName = createBoardNameUnderbar(tableName);
 		try {
 			connect();
 			String sql = "DELETE FROM " + boardName + " WHERE text_num = ?";
@@ -394,7 +471,7 @@ public class BoardDAO extends DAO {
 
 	public void createComment(String tableName, Comment comment, String sequence) {
 		// 시퀀스.nextval(
-		String boardName = createBoardName(tableName);
+		String boardName = createBoardNameUnderbar(tableName);
 		System.out.println(boardName);
 		try {
 			connect();
@@ -420,15 +497,16 @@ public class BoardDAO extends DAO {
 
 	// 해당 글에 있는 댓글 전체 조회
 	public List<Comment> showAllComment(String tableName, int textNum) {
+		String boardName = createCommentBoardName(tableName);
 		List<Comment> list = new ArrayList<>();
 		try {
 			connect();
-			String sql = "SELECT * FROM ? WHERE text_num = ? ORDER BY comment_num";
-			pstmt = conn.prepareStatement(sql);
-			rs = pstmt.executeQuery();
-			if (rs.next()) {
+			String sql = "SELECT * FROM " + boardName + " WHERE text_num = " + textNum + " ORDER BY comment_num";
+			stmt = conn.createStatement();
+			rs = stmt.executeQuery(sql);
+			while (rs.next()) {
 				Comment comment = new Comment();
-				comment.setComment(rs.getString("comment"));
+				comment.setComment(rs.getString("comment_text"));
 				comment.setCommentNum(rs.getInt("comment_num"));
 				comment.setMemberId(rs.getString("member_id"));
 				comment.setTextNum(rs.getInt("text_num"));
@@ -446,19 +524,18 @@ public class BoardDAO extends DAO {
 	}
 
 	public Comment showOneComment(String tableName, int commentNum) {
-		String boardName = createBoardName(tableName);
+		String boardName = createCommentBoardName(tableName);
 		Comment comment = null;
 		try {
 			connect();
-			String sql = "SELECT * FROM ? WHERE comment_num = ?";
+			String sql = "SELECT * FROM " + boardName + " WHERE comment_num = ?";
 			pstmt = conn.prepareStatement(sql);
-			pstmt.setString(1, boardName);
-			pstmt.setInt(2, commentNum);
+			pstmt.setInt(1, commentNum);
 
 			rs = pstmt.executeQuery();
 			if (rs.next()) {	
 				comment = new Comment();
-				comment.setComment(rs.getString("comment"));
+				comment.setComment(rs.getString("comment_text"));
 				comment.setCommentNum(rs.getInt("comment_num"));
 				comment.setMemberId(rs.getString("member_id"));
 				comment.setTextNum(rs.getInt("text_num"));
@@ -471,16 +548,16 @@ public class BoardDAO extends DAO {
 		return comment;
 	}
 
-	public void updateComment(String tableName, Comment comment, String newComment) {
+	public void updateComment(String tableName, Comment comment) {
+		String boardName = createCommentBoardName(tableName);
 		try {
 			connect();
-			String sql = "UPDATE INTO ? (comment) VALUES (?) WHERE text_num = ? AND comment_num = ?";
+			String sql = "UPDATE " + boardName + " SET comment_text = ? WHERE text_num = ? AND comment_num = ?";
 			pstmt = conn.prepareStatement(sql);
-			pstmt.setString(1, tableName);
-			pstmt.setString(2, newComment);
-			pstmt.setInt(3, comment.getTextNum());
-			pstmt.setInt(4, comment.getCommentNum());
-
+			pstmt.setString(1, comment.getComment());
+			pstmt.setInt(2, comment.getTextNum());
+			pstmt.setInt(3, comment.getCommentNum());
+						
 			int result = pstmt.executeUpdate();
 			if (result > 0) {
 				System.out.println("댓글이 정상적으로 업데이트 되었습니다.");
@@ -501,21 +578,19 @@ public class BoardDAO extends DAO {
 	// 테이블 한 로우에 특정 컬럼값이 부족하다(null)이다
 	// dao의 어느 메소드에 매개변수로 그 객체를 가져와서 사용하는 경우에
 	//
-	public void deleteComment(String tableName, Comment comment) {
+	public void deleteComment(String tableName, int commentNum) {
+		String boardName = createCommentBoardName(tableName);
 		try {
 			connect();
-			String sql = "UPDATE INTO ? (comment) VALUES (?) WHERE text_num = ? AND comment_num = ?";
+			String sql = "DELETE FROM "+ boardName + " WHERE comment_num = ?";
 			pstmt = conn.prepareStatement(sql);
-			pstmt.setString(1, tableName);
-			pstmt.setString(2, comment.getComment());
-			pstmt.setInt(3, comment.getTextNum());
-			pstmt.setInt(4, comment.getCommentNum());
+			pstmt.setInt(1, commentNum);
 
 			int result = pstmt.executeUpdate();
 			if (result > 0) {
-				System.out.println("댓글이 정상적으로 업데이트 되었습니다.");
+				System.out.println("댓글이 정상적으로 삭제 되었습니다.");
 			} else {
-				System.out.println("댓글이 정상적으로 업데이트 되지 않았습니다.");
+				System.out.println("댓글이 정상적으로 삭제 되지 않았습니다.");
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();

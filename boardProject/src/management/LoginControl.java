@@ -7,11 +7,11 @@ import DAO.MemberDAO;
 import VO.LoginMember;
 import VO.Member;
 
-public class loginControl {
+public class LoginControl {
 	Scanner sc = new Scanner(System.in);
 	MemberDAO mDAO = MemberDAO.getInstance();
 
-	public loginControl() {
+	public void run() {
 		menuPrint();
 		while (true) {
 			int selectNum = menuSelect();
@@ -20,7 +20,8 @@ public class loginControl {
 			} else if (selectNum == 2) {
 				login();
 			} else if (selectNum == 3) {
-				new AnonymousManagement();
+				AnonymousManagement anonymousManagement = new AnonymousManagement();
+				anonymousManagement.run();
 			} else if (selectNum == 4) {
 				logOut();
 			}
@@ -40,7 +41,7 @@ public class loginControl {
 	}
 
 	public int menuSelect() {
-		int selectNum = 0;
+		int selectNum = 0;	
 		System.out.println("메뉴를 입력하세요");
 		try {
 			selectNum = Integer.parseInt(sc.nextLine());
@@ -100,7 +101,8 @@ public class loginControl {
 				adminManagement.run();
 			} else {
 				loginMember.setRole(1);
-				new UserManagement();
+				UserManagement userManagement = new UserManagement();
+				userManagement.run();
 			}
 
 		} else {

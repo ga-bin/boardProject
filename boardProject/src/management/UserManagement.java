@@ -2,7 +2,7 @@ package management;
 
 public class UserManagement extends Management {
 	
-	UserManagement() {
+	public void run() {
 		while (true) {
 			menuPrint();
 			int selectNum = selectMenu();
@@ -13,7 +13,8 @@ public class UserManagement extends Management {
 			}  else if (selectNum == 9) {
 				back();
 				// 뒤로가기 메소드는 다시 loginControl을 호출하는 것으로 가자
-				new loginControl();
+				LoginControl loginControl = new LoginControl();
+				loginControl.run();
 			} else {
 				showInputError();
 			}
@@ -32,10 +33,6 @@ public class UserManagement extends Management {
 		if (boardName.equals("")) {
 			System.out.println("등록된 게시판이 아닙니다.");
 			return;
-		} 
-		if (boardName.contains("NOTICE")) {
-			System.out.println("접근 권한이 없습니다.");
-			return;
 		}
 		System.out.println("=================================================================");
 		System.out.println("1. 게시글 작성    2. 게시글 삭제   3. 글 번호로 게시글 조회  4. 제목으로 게시글 조회");
@@ -50,10 +47,7 @@ public class UserManagement extends Management {
 			System.out.println("등록된 게시판이 아닙니다.");
 			return;
 		}
-		if (boardName.contains("NOTICE")) {
-			System.out.println("접근 권한이 없습니다.");
-			return;
-		}
+	
 		System.out.println("=============================================================");
 		System.out.println("1. 댓글 생성   2. 댓글 수정    3. 댓글 삭제   4. 댓글 조회    9. 뒤로가기");
 		System.out.println("=============================================================");
@@ -62,7 +56,6 @@ public class UserManagement extends Management {
 	
 	private void contentMenuRun() {
 		while (true) {
-			System.out.println("메뉴를 입력하세요");
 			int selectNum = selectMenu();
 			if (selectNum == 1) {
 				createContent();
@@ -78,7 +71,7 @@ public class UserManagement extends Management {
 				updateTitleOrContent();
 			} else if (selectNum == 9) {
 				back();
-				return;
+				run();
 			} else {
 				showInputError();
 				return;
@@ -88,7 +81,6 @@ public class UserManagement extends Management {
 	
 	private void commentMenuRun() {
 		while (true) {
-			System.out.println("메뉴를 입력하세요");
 			int selectNum = selectMenu();
 			if (selectNum == 1) {
 				createComment();
@@ -100,7 +92,7 @@ public class UserManagement extends Management {
 				showComment();
 			} else if (selectNum == 9) {
 				back();
-				return;
+				run();
 			} else {
 				showInputError();
 				return;
