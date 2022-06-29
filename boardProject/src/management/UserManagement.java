@@ -1,11 +1,14 @@
 package management;
 
+// 유저로 로그인했을 때 실행되는 클래스
 public class UserManagement extends Management {
-
+	
+	// 유저로 로그인했을 때 실행되는 첫 화면
 	public void run() {
 		while (true) {
 			menuPrint();
 			int selectNum = selectMenu();
+			// 유저들이 접근하면 안되는 게시판에 접근하는 것을 막기
 			boolean accessible = blockUser();
 			if (accessible == false) {
 				return;
@@ -25,15 +28,19 @@ public class UserManagement extends Management {
 
 		}
 	}
-
+	
+	// 유저로 로그인 했을 떄 
 	private void menuPrint() {
 		System.out.println("=====================================");
 		System.out.println("1. 게시글 관리   2. 댓글 관리    9. 뒤로 가기");
 		System.out.println("=====================================");
 	}
-
+	
+	// 유저들이 접근하면 안되는 게시판에 접근할 경우 막기
 	private boolean blockUser() {
+		// 사용불가능한 게시판에 접근할 경우 막기
 		blockUnusedBoard();
+		// 유저가 등록되지 않은 게시판에 접근하는 경우 막기
 		if (boardName.equals("")) {
 			System.out.println("등록된 게시판이 아닙니다.");
 			return false;

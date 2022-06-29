@@ -20,26 +20,34 @@ public class Management {
 	String boardName;
 	LoginMember loginMember = LoginMember.getInstance();
 	
+	// BoardMenu를 선택하면 자동으로 boardName을 부여받는 메소드
 	protected String selectBoard() {
+		// 이미 boardName이 있는 경우에는 selectBoard메소드를 실행시키지 않고 return한다.
 		if (boardName != null && boardName.length() > 0) {
 			return boardName;
 		}
+		// boardName 초기화하고 boardmenuPrint
 		boardName = "";
-		System.out.println("게시판 선택>");
-		System.out.println("====================================================================");
-		System.out.println("1. 공지사항 게시판    2. 자유게시판(유저)   3. 자유게시판(익명)   4. 코딩게시판(유저) ");
-		System.out.println("====================================================================");
+		selectBoardMenu();
 		try {
 			int selectNum = Integer.parseInt(sc.nextLine());
+			// 입력받은 숫자를 바탕으로 boardinfo에서 board이름을 가져오기
 			BoardInfo board = bDAO.selectBoard(selectNum);
 			boardName += board.getBoardName();
-			
-			// 있는 글 전체 조회
+		
 		} catch (NumberFormatException e) {
 			System.out.println("숫자 형식으로 입력해 주세요");
 			return selectBoard();
 		}
 		return boardName;
+	}
+	
+	// 유저들이 선택할 수 있는 board를 print하는 메소드
+	protected void selectBoardMenu() {
+		System.out.println("게시판 선택>");
+		System.out.println("==================================================================");
+		System.out.println("1. 공지사항 게시판    2. 자유게시판(유저)   3. 자유게시판(익명)   4. 코딩게시판(유저)");
+		System.out.println("==================================================================");
 	}
 
 	protected void createContent() {
@@ -352,8 +360,11 @@ public class Management {
 		return comment;
 	}
 	
+	// 사용 불가능한 게시판 막기
 	protected boolean blockUnusedBoard() {
+		// 유저들에게 board선택을 받아서 board이름을 받아온다.
 		selectBoard();
+		// 
 		boolean usedBoard;
 		BoardInfo boardInfo = bDAO.showOneBoard(boardName);
 		if (boardInfo.getUsAble() == 1) {

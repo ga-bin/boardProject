@@ -74,7 +74,6 @@ public class BoardDAO extends DAO {
 	public BoardInfo selectBoard(String tableName) {
 		BoardInfo board = null;
 		String boardName = createBoardNameUnderbar(tableName);
-		System.out.println(boardName);
 		try {
 			connect();
 			String sql = "SELECT * FROM boardInfo WHERE board_name = '" + boardName + "'";
