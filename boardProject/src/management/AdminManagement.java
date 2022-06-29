@@ -8,7 +8,7 @@ public class AdminManagement extends Management {
 
 	public void run() {
 		menuPrint();
-		while (true){
+		while (true) {
 			int selectNum = selectMenu();
 			if (selectNum == 1) {
 				boardMenuPrint();
@@ -44,22 +44,15 @@ public class AdminManagement extends Management {
 	}
 
 	private void contentMenuPrint() {
-		System.out.println("=================================================================");
-		System.out.println("1. 게시글 작성    2. 게시글 삭제   3. 글 번호로 게시글 조회  4. 제목으로 게시글 조회");
-		System.out.println("5. 내용으로 게시글 조회    6. 게시글 수정     9. 뒤로가기");
-		System.out.println("=================================================================");
+		System.out.println("====================================================================");
+		System.out.println("1. 게시글 작성    2. 게시글 삭제  3. 게시글 전체 조회   4. 글 번호로 게시글 조회");
+		System.out.println("5. 제목으로 게시글 조회    6. 내용으로 게시글 조회    7. 게시글 수정     9. 뒤로가기");
+		System.out.println("====================================================================");
 		contentMenuRun();
 	}
 
 	private void commentMenuPrint() {
-		showAllBoard();
-		selectBoard();
-		
-		BoardInfo boardInfo = bDAO.showOneBoard(boardName);
-		boolean usedBoard = blockUnusedBoard();
-		if (usedBoard == false) {
-			return;
-		}
+		showAllContent();
 		
 		System.out.println("=============================================================");
 		System.out.println("1. 댓글 생성   2. 댓글 수정    3. 댓글 삭제   4. 댓글 조회    9. 뒤로가기");
@@ -94,17 +87,23 @@ public class AdminManagement extends Management {
 	private void contentMenuRun() {
 		while (true) {
 			int selectNum = selectMenu();
+			boolean usedBoard = blockUnusedBoard();
+			if (usedBoard == false) {
+				return;
+			}
 			if (selectNum == 1) {
 				createContent();
 			} else if (selectNum == 2) {
 				deleteContent();
 			} else if (selectNum == 3) {
-				showContentByNum();
+				showAllContent();
 			} else if (selectNum == 4) {
-				showContentByTitle();
+				showContentByNum();
 			} else if (selectNum == 5) {
-				showContentByCon();
+				showContentByTitle();
 			} else if (selectNum == 6) {
+				showContentByCon();
+			} else if (selectNum == 7) {
 				updateTitleOrContent();
 			} else if (selectNum == 9) {
 				back();
@@ -124,7 +123,7 @@ public class AdminManagement extends Management {
 			} else if (selectNum == 2) {
 				updateComment();
 			} else if (selectNum == 3) {
-				deleteComment(); 
+				deleteComment();
 			} else if (selectNum == 4) {
 				showComment();
 			} else if (selectNum == 9) {
@@ -144,8 +143,8 @@ public class AdminManagement extends Management {
 		// 뒤로가기 등을 통해서 유저들이 다른 게시판을 선택하고나면
 		// 그 게시판의 이름이 boardName에 들어갈 수 있도록 selectBoard가 실행되어야 한다
 		// 그러면 createBoardNameByNum과 selectBoard는 어떻게 분리되어야 하는가
-		if (bDAO.selectBoard(boardName+"_user_content_board") != null
-				&& bDAO.selectBoard(boardName +"_anonymous_content_board") != null
+		if (bDAO.selectBoard(boardName + "_user_content_board") != null
+				&& bDAO.selectBoard(boardName + "_anonymous_content_board") != null
 				&& boardName != "notice_content_board") {
 			System.out.println("이미 있는 게시판입니다. 다른 이름을 입력해주세요");
 			createBoard();
@@ -158,14 +157,14 @@ public class AdminManagement extends Management {
 		if (selectNum == 1) {
 			boardName = boardName += "_USER";
 		} else if (selectNum == 2) {
-			boardName = boardName += "_ANONYMOUS";
+			boardName = boardName += "_ANONY";
 		}
 		bDAO.createContentTable(boardName);
 		bDAO.createCommentTable(boardName);
 		bDAO.createSeq(boardName, "CONTENT");
 		bDAO.createSeq(boardName, "COMMENT");
 		bDAO.insertTableToBoardInfo(boardName);
-		
+
 	}
 
 	private void showAllBoard() {
@@ -188,10 +187,9 @@ public class AdminManagement extends Management {
 		System.out.println("사용 중지할 게시판 이름을 입력하세요");
 		boardName = sc.nextLine();
 
-		if (bDAO.selectBoard(boardName) == null) {
-			System.out.println("등록된 게시판이 아닙니다.");
-			makeUnusedBoard();
-		}
+//		if (bDAO.selectBoard(boardName) == null) {
+//			makeUnusedBoard();
+//		}
 
 		bDAO.makeToggleUsedBoard(boardName, 1);
 		boardName = ""; // 다른 기능들에 접근권한을 다 막기 위해서
@@ -201,10 +199,10 @@ public class AdminManagement extends Management {
 		System.out.println("사용 가능하게 할 게시판 이름을 입력하세요");
 		boardName = sc.nextLine();
 
-		if (bDAO.selectBoard(boardName) == null) {
-			System.out.println("등록된 게시판이 아닙니다.");
-			makeUsedBoard();
-		}
+//		if (bDAO.selectBoard(boardName) == null) {
+//			System.out.println("등록된 게시판이 아닙니다.");
+//			makeUsedBoard();
+//		}
 		bDAO.makeToggleUsedBoard(boardName, 0);
 
 	}

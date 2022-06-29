@@ -1,5 +1,6 @@
 package management;
 
+import java.nio.channels.ScatteringByteChannel;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Scanner;
@@ -20,16 +21,18 @@ public class Management {
 	LoginMember loginMember = LoginMember.getInstance();
 	
 	protected String selectBoard() {
+		if (boardName != null && boardName.length() > 0) {
+			return boardName;
+		}
 		boardName = "";
 		System.out.println("게시판 선택>");
 		System.out.println("====================================================================");
-		System.out.println("1. 공지사항 게시판    2. 자유게시판(유저)   3. 자유게시판(익명)   7. 코딩게시판(유저) ");
+		System.out.println("1. 공지사항 게시판    2. 자유게시판(유저)   3. 자유게시판(익명)   4. 코딩게시판(유저) ");
 		System.out.println("====================================================================");
-		int selectNum = Integer.parseInt(sc.nextLine());
 		try {
+			int selectNum = Integer.parseInt(sc.nextLine());
 			BoardInfo board = bDAO.selectBoard(selectNum);
 			boardName += board.getBoardName();
-			bDAO.showAllContent(boardName);
 			
 			// 있는 글 전체 조회
 		} catch (NumberFormatException e) {
@@ -44,8 +47,7 @@ public class Management {
 			System.out.println("권한이 없습니다.");
 			return;
 		}
-			
-		selectBoard();
+		
 		boolean usedBoard = blockUnusedBoard();
 		if (usedBoard == false) {
 			return;
@@ -61,6 +63,14 @@ public class Management {
 
 		// 시퀀스 이름 어떤 식으로 가져오지
 		bDAO.createContent(boardName, content);
+	}
+	
+	protected void showAllContent() {
+		selectBoard();
+		List<Content> list = bDAO.showAllContent(boardName);
+		for (Content content : list) {
+			System.out.println(content);
+		}
 	}
 
 	protected void showContentByNum() {
@@ -82,7 +92,6 @@ public class Management {
 	}
 
 	protected void showContentByCon() {
-		selectBoard();
 		BoardInfo boardInfo = bDAO.showOneBoard(boardName);
 		boolean usedBoard = blockUnusedBoard();
 		if (usedBoard == false) {
@@ -91,7 +100,7 @@ public class Management {
 		
 		System.out.println("내용의 일부를 입력하세요");
 		String contentText = sc.nextLine();
-		if (bDAO.showContentByCon(boardName, contentText) == null) {
+		if (bDAO.showContentByCon(boardName, contentText).isEmpty()) {
 			System.out.println("등록된 게시글이 아닙니다. 다시 입력하세요");
 			showContentByCon();
 		}
@@ -103,16 +112,16 @@ public class Management {
 	}
 
 	protected void showContentByTitle() {
-		selectBoard();
-		BoardInfo boardInfo = bDAO.showOneBoard(boardName);
-		if (boardInfo.getUsAble() == 1) {
-			System.out.println("사용불가능한 게시판입니다.");
+		boolean usedBoard = blockUnusedBoard();
+		if (usedBoard == false) {
 			return;
 		}
 		
+		BoardInfo boardInfo = bDAO.showOneBoard(boardName);
+		
 		System.out.println("제목의 일부를 입력하세요");
 		String titleText = sc.nextLine();
-		if (bDAO.showContentByTitle(boardName, titleText) == null) {
+		if (bDAO.showContentByTitle(boardName, titleText).isEmpty()) {
 			System.out.println("작성된 글이 없습니다.");
 			return;
 		}
@@ -136,6 +145,7 @@ public class Management {
 		}
 
 		System.out.println("수정할 글의 번호를 입력하세요");
+		try {
 		int contentNum = Integer.parseInt(sc.nextLine());
 		Content content = bDAO.showContentByNum(boardName, contentNum);
 
@@ -152,12 +162,16 @@ public class Management {
 		System.out.println("수정할 제목을 입력하세요(수정하지 않을 경우 0)");
 		String contentText = sc.nextLine();
 		if (!contentText.equals("0")) {
+			bDAO.updateTitle(boardName, contentText, contentNum);
 		}
 
 		System.out.println("수정할 게시글 내용을 입력하세요(수정하지 않을 경우 0)");
 		String commentText = sc.nextLine();
 		if (!commentText.equals("0")) {
 			bDAO.updateContent(boardName, commentText, contentNum);
+		}
+		} catch(NumberFormatException e) {
+			System.out.println("숫자 형식으로 입력해주세요");
 		}
 	}
 
@@ -167,7 +181,6 @@ public class Management {
 			return;
 		}
 		
-		selectBoard();
 		boolean usedBoard = blockUnusedBoard();
 		if (usedBoard == false) {
 			return;
@@ -199,15 +212,16 @@ public class Management {
 			System.out.println("작성된 글이 아닙니다.");
 			createComment();
 		}
-
+		
 		System.out.println("작성할 댓글 내용을 입력하세요");
 		// 나중에 엔터쳐도 바로 등록안되고 특정글자 눌러야 입력되도록 처리해보자
+		
 		Comment comment = inputComment();
 		comment.setTextNum(contentNum);
 
 		// comment안에 내용 입력받아서 넣기
 
-		bDAO.createComment(bDAO.createCommentBoardName(boardName), comment, bDAO.createSequenceName(boardName));
+		bDAO.createComment(bDAO.createCommentBoardName(boardName), comment);
 		// 게시글 테이블은 boardinfo안에 들어있어서 select문을 통해 가지고 온 selectboard메소드로 가져올 수 있다
 		// 그러면 boardinfo 테이블에 없는 댓글 테이블은 어떤 방식으로 가져와야 하는거지?
 
@@ -339,6 +353,7 @@ public class Management {
 	}
 	
 	protected boolean blockUnusedBoard() {
+		selectBoard();
 		boolean usedBoard;
 		BoardInfo boardInfo = bDAO.showOneBoard(boardName);
 		if (boardInfo.getUsAble() == 1) {

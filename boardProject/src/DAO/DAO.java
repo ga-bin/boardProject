@@ -12,10 +12,10 @@ import java.util.Properties;
 
 public class DAO {
 	// oracle db정보
-	private String jdbc_driver;
-	private String oracle_url;
-	private String connectedId;
-	private String connectedPwd;
+	private String jdbc_driver = "oracle.jdbc.driver.OracleDriver";
+	private String oracle_url = "jdbc:oracle:thin:@localhost:1521:xe";
+	private String connectedId = "hr";
+	private String connectedPwd = "hr";
 	
 	// 공통적으로 사용할 필드
 	protected Connection conn;
@@ -24,7 +24,7 @@ public class DAO {
 	protected ResultSet rs;
 	
 	public DAO() {
-		dbConfig();
+//		dbConfig();
 	}
 	
 	public void connect() {
@@ -39,21 +39,21 @@ public class DAO {
 		}
 	}
 	
-	public void dbConfig() {
-		String resource = "config/db.properties";
-		Properties properties = new Properties();
-		
-		try {
-			String filePath = ClassLoader.getSystemClassLoader().getResource(resource).getPath();	
-			properties.load(new FileInputStream(filePath));
-		} catch(IOException e) {
-			e.printStackTrace();
-		}
-		jdbc_driver = properties.getProperty("driver");
-		oracle_url = properties.getProperty("url");
-		connectedId = properties.getProperty("id");
-		connectedPwd = properties.getProperty("password");
-	}
+//	public void dbConfig() {
+//		String resource = "config/db.properties";
+//		Properties properties = new Properties();
+//		
+//		try {
+//			String filePath = ClassLoader.getSystemClassLoader().getResource(resource).getPath();	
+//			properties.load(new FileInputStream(filePath));
+//		} catch(IOException e) {
+//			e.printStackTrace();
+//		}
+//		jdbc_driver = properties.getProperty("driver");
+//		oracle_url = properties.getProperty("url");
+//		connectedId = properties.getProperty("id");
+//		connectedPwd = properties.getProperty("password");
+//	}
 	
 	public void disconnect() {
 		if (rs != null)

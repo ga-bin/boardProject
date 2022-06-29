@@ -74,6 +74,7 @@ public class BoardDAO extends DAO {
 	public BoardInfo selectBoard(String tableName) {
 		BoardInfo board = null;
 		String boardName = createBoardNameUnderbar(tableName);
+		System.out.println(boardName);
 		try {
 			connect();
 			String sql = "SELECT * FROM boardInfo WHERE board_name = '" + boardName + "'";
@@ -101,7 +102,6 @@ public class BoardDAO extends DAO {
 			String sql = "CREATE table " + tableName + "_content_board" + "    (text_num number,"
 					+ "    member_id varchar2(100)," + "    title varchar2(1000)," + "    content varchar2(1000),"
 					+ "		constraint " + tableName + "_content_board_pk primary key(text_num)" + ")";
-
 			stmt = conn.createStatement();
 			boolean result = stmt.execute(sql);
 			System.out.println("게시판 테이블 생성 성공");
@@ -246,7 +246,7 @@ public class BoardDAO extends DAO {
 			String sql = "UPDATE boardinfo SET usable = ? WHERE board_name = ?";
 			pstmt = conn.prepareStatement(sql);
 			pstmt.setInt(1, usAble);
-			pstmt.setString(2, boardName + "_content_board");
+			pstmt.setString(2, boardName + " CONTENT BOARD");
 			int result = pstmt.executeUpdate();
 			if (result > 0) {
 				System.out.println(boardName + "의 사용여부가 정상적으로 변경되었습니다.");
@@ -469,13 +469,14 @@ public class BoardDAO extends DAO {
 		}
 	}
 
-	public void createComment(String tableName, Comment comment, String sequence) {
+	public void createComment(String tableName, Comment comment) {
 		// 시퀀스.nextval(
 		String boardName = createBoardNameUnderbar(tableName);
-		System.out.println(boardName);
+		String sequenceName = boardName.substring(0, 17) + "_SEQ";
+		
 		try {
 			connect();
-			String sql = "INSERT INTO " + boardName + " VALUES (?, " + sequence + ".nextval, ?, ?)";
+			String sql = "INSERT INTO " + boardName + " VALUES (?, " + sequenceName + ".nextval, ?, ?)";
 			pstmt = conn.prepareStatement(sql);
 			pstmt.setInt(1, comment.getTextNum());
 			pstmt.setString(2, comment.getMemberId());

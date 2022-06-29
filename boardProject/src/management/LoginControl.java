@@ -34,9 +34,9 @@ public class LoginControl {
 		}
 	}
 
-	public void menuPrint() {
+	public static void menuPrint() {
 		System.out.println("=============================================================");
-		System.out.println("1.회원가입     2. 로그인    3. 익명게시판   4. 로그 아웃     9. 프로그램종료");
+		System.out.println("1.회원가입     2. 로그인    3. 익명유저   4. 로그 아웃     9. 프로그램종료");
 		System.out.println("==============================================================");
 	}
 
