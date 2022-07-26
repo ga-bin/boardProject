@@ -1,7 +1,8 @@
 package management;
 
 public class AnonymousManagement extends Management {
-
+	
+	// AnoymousManagement가 실행되었을 때 강제로 익명 유저를 anony로 로그인
 	public AnonymousManagement() {
 		loginMember.setMemberId("anony");
 		loginMember.setMemberPwd("anony");

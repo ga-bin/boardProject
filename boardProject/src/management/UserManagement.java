@@ -47,7 +47,8 @@ public class UserManagement extends Management {
 		}
 		return true;
 	}
-
+	
+	// 1. 게시글 관리 선택했을 때 출력화면
 	private void contentMenuPrint() {
 		System.out.println("====================================================================");
 		System.out.println("1. 게시글 작성    2. 게시글 삭제  3. 게시글 전체 조회   4. 글 번호로 게시글 조회");
@@ -55,20 +56,8 @@ public class UserManagement extends Management {
 		System.out.println("====================================================================");
 		contentMenuRun();
 	}
-
-	private void commentMenuPrint() {
-		if (boardName.equals("")) {
-			System.out.println("등록된 게시판이 아닙니다.");
-			return;
-		}
-		
-		// 그럴수있지 수정하자!!!!!
-		System.out.println("=============================================================");
-		System.out.println("1. 댓글 생성   2. 댓글 수정    3. 댓글 삭제   4. 댓글 조회    9. 뒤로가기");
-		System.out.println("=============================================================");
-		commentMenuRun();
-	}
-
+	
+	// 1. 게시글 관리 실행
 	private void contentMenuRun() {
 		while (true) {
 			int selectNum = selectMenu();
@@ -96,6 +85,22 @@ public class UserManagement extends Management {
 		}
 	}
 
+	// 2. 댓글 관리 선택했을 떄 출력 화면
+	private void commentMenuPrint() {
+		if (boardName.equals("")) {
+			System.out.println("등록된 게시판이 아닙니다.");
+			return;
+		}
+	
+		System.out.println("=============================================================");
+		System.out.println("1. 댓글 생성   2. 댓글 수정    3. 댓글 삭제   4. 댓글 조회    9. 뒤로가기");
+		System.out.println("=============================================================");
+		commentMenuRun();
+	}
+
+	
+	
+	// 2. 댓글 관리 실행
 	private void commentMenuRun() {
 		while (true) {
 			int selectNum = selectMenu();
